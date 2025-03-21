@@ -1,6 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">My Tasks</h2>
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-gray-800 leading-tight">
+                My Tasks
+            </h2>
+
+            <a href="{{ route('tasks.create') }}"
+                class="ml-4 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                + New Task
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-6">
@@ -17,38 +26,34 @@
                 </div>
             @endif
 
-            <div class="flex justify-end mb-4">
-                <a href="{{ route('tasks.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    + New Task
-                </a>
-            </div>
-
             @forelse ($tasks as $task)
                 <div class="bg-white shadow-sm rounded-lg p-6 mb-4">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-xl font-bold">{{ $task->title }}</h3>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                        {{-- Left content --}}
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800">{{ $task->title }}</h3>
                             <p class="text-gray-600">
-                                {{ Str::limit($task->description, 50) }}
+                                {{ $task->description }}
                             </p>
                             <p class="text-sm mt-2">
                                 Due: <span class="font-medium">{{ $task->due_date->format('M d, Y') }}</span> |
                                 Status:
                                 <span
                                     class="inline-block px-2 py-1 rounded-full text-xs font-semibold
-    {{ $task->status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                                    {{ $task->status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
                                     {{ $task->status }}
                                 </span>
                             </p>
                         </div>
 
-                        <div class="flex gap-2">
+                        {{-- Right action buttons --}}
+                        <div class="flex flex-wrap gap-2 sm:justify-end">
                             <button type="button" data-task-id="{{ $task->id }}"
                                 class="toggle-status-btn px-3 py-1 text-sm rounded transition
-        {{ $task->status === 'Pending'
-            ? 'bg-green-100 text-green-800 hover:bg-green-200'
-            : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' }}">
-                                {{ $task->status === 'Pending' ? 'Complete' : 'Pending' }}
+                                {{ $task->status === 'Pending'
+                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' }}">
+                                {{ $task->status === 'Pending' ? 'Mark Complete' : 'Mark Pending' }}
                             </button>
 
                             <a href="{{ route('tasks.edit', $task) }}"
@@ -56,14 +61,11 @@
                                 Edit
                             </a>
 
-                            <form method="POST" action="{{ route('tasks.destroy', $task) }}"
-                                onsubmit="return confirm('Are you sure you want to delete this task?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm">
-                                    Delete
-                                </button>
-                            </form>
+                            <button type="button"
+                                class="delete-task-btn bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
+                                data-task-id="{{ $task->id }}">
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -98,7 +100,7 @@
                     .then(data => {
                         if (data.success) {
                             location
-                        .reload(); // Or update just that task's DOM for better UX
+                                .reload();
                         } else {
                             alert(data.message || 'Failed to update status.');
                         }
@@ -109,5 +111,38 @@
                     });
             });
         });
+
+        // Delete button
+        document.querySelectorAll('.delete-task-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!confirm('Are you sure you want to delete this task?')) return;
+
+                const taskId = btn.getAttribute('data-task-id');
+                const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute(
+                    'content');
+
+                fetch(`/tasks/${taskId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrf,
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            location
+                                .reload();
+                        } else {
+                            alert('Failed to delete task.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Something went wrong.');
+                    });
+            });
+        });
+
     });
 </script>
