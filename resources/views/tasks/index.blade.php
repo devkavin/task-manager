@@ -35,6 +35,9 @@
                             <p class="text-gray-600">
                                 {{ $task->description }}
                             </p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                Created {{ $task->created_at->diffForHumans() }}
+                            </p>
                             <p class="text-sm mt-2">
                                 Due: <span class="font-medium">{{ $task->due_date->format('M d, Y') }}</span> |
                                 Status:
@@ -70,7 +73,10 @@
                     </div>
                 </div>
             @empty
-                <p class="text-gray-600">You have no tasks yet.</p>
+                <div class="text-center py-12 text-gray-500">
+                    <p class="text-lg">No tasks found.</p>
+                    <p class="mt-2 mb-10 text-sm">Get started by creating a new task.</p>
+                </div>
             @endforelse
 
             <div class="mt-6">
