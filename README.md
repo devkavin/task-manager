@@ -71,6 +71,12 @@ php artisan serve
 
 Visit: http://localhost:8000
 ```
+
+### 7. Logging in
+```bash
+For testing purposes, login using the test credentials on the Login Page
+```
+
 ---
 
 ## 📂 Folder Structure Highlights
