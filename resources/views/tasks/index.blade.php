@@ -27,7 +27,7 @@
             @endif
 
             @forelse ($tasks as $task)
-                <div class="bg-white shadow-sm rounded-lg p-6 mb-4">
+                <div class="bg-white shadow-sm rounded-lg p-4 sm:p-6 mb-4">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                         {{-- Left content --}}
                         <div class="flex-1">
