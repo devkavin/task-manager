@@ -78,7 +78,7 @@ class TaskController extends Controller
         $this->authorize('delete', $task);
         $task->delete();
 
-        return redirect()->route('tasks.index')->with('success', 'Task deleted successfully!');
+        return response()->json(['success' => true]);
     }
 
     // changes task status from pending to completed or completed
