@@ -92,5 +92,5 @@ For testing purposes, login using the test credentials on the Login Page
 ## 📋 Notes
 - CSRF protection is handled via meta tag and fetch headers.
 - Only the authenticated user can manage their own tasks.
-- "Mark Complete"/"Mark Pending" toggle is via AJAX.
+- "Mark Complete"/"Mark Pending" toggle and Destroy is via AJAX.
 - All deletes are soft deletes.
