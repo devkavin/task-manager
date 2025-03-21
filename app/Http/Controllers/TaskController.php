@@ -10,14 +10,14 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class TaskController extends Controller
 {
-    use AuthorizesRequests; // using policy for this
+    use AuthorizesRequests; // using task policy for this
 
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $tasks = Auth::user()->tasks()->latest()->get();
+        $tasks = Auth::user()->tasks()->latest()->paginate(5);
         // dd($tasks);
         return view('tasks.index', compact('tasks'));
     }
@@ -87,12 +87,18 @@ class TaskController extends Controller
         $this->authorize('update', $task);
 
         if ($task->status === 'Completed' && now()->greaterThan($task->due_date)) {
-            return redirect()->route('tasks.index')->with('error', 'Cannot change status after the due date!');
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot change status after the due date!',
+            ], 400);
         }
 
         $task->status = $task->status === 'Pending' ? 'Completed' : 'Pending';
         $task->save();
 
-        return redirect()->route('tasks.index')->with('success', 'Task status updated!');
+        return response()->json([
+            'success' => true,
+            'status' => $task->status,
+        ]);
     }
 }

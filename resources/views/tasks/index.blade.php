@@ -43,16 +43,13 @@
                         </div>
 
                         <div class="flex gap-2">
-                            <form method="POST" action="{{ route('tasks.toggleStatus', $task) }}">
-                                @csrf
-                                @method('PATCH')
-                                <button title="Mark as {{ $task->status === 'Pending' ? 'Completed' : 'Pending' }}"
-                                    class="bg-gray-100 px-3 py-1 rounded hover:bg-gray-200 text-sm w-24 rounded transition {{ $task->status === 'Pending'
-                                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' }}">
-                                    {{ $task->status === 'Pending' ? 'Complete' : 'Pending' }}
-                                </button>
-                            </form>
+                            <button type="button" data-task-id="{{ $task->id }}"
+                                class="toggle-status-btn px-3 py-1 text-sm rounded transition
+        {{ $task->status === 'Pending'
+            ? 'bg-green-100 text-green-800 hover:bg-green-200'
+            : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' }}">
+                                {{ $task->status === 'Pending' ? 'Complete' : 'Pending' }}
+                            </button>
 
                             <a href="{{ route('tasks.edit', $task) }}"
                                 class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-sm">
@@ -73,6 +70,44 @@
             @empty
                 <p class="text-gray-600">You have no tasks yet.</p>
             @endforelse
+
+            <div class="mt-6">
+                {{ $tasks->links() }}
+            </div>
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.toggle-status-btn');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const taskId = btn.getAttribute('data-task-id');
+
+                fetch(`/tasks/${taskId}/toggle-status`, {
+                        method: 'PATCH',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            location
+                        .reload(); // Or update just that task's DOM for better UX
+                        } else {
+                            alert(data.message || 'Failed to update status.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Something went wrong.');
+                    });
+            });
+        });
+    });
+</script>
